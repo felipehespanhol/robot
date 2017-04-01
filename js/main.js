@@ -1,6 +1,7 @@
 var game;
-var useLandscape = false;
+var useLandscape = true;
 var soundOn = true;
+var cursors;
 
 window.onload = function () {
   var isMobile=navigator.userAgent.indexOf("Mobile");
@@ -14,9 +15,9 @@ window.onload = function () {
   if (isMobile==false) {
     //desktop laptop
     if (useLandscape == true) {
-      game = new Phaser.Game(640, 480, Phaser.AUTO, "ph_game");
+      game = new Phaser.Game(1200, 800, Phaser.AUTO, "ph_game");
     } else {
-      game = new Phaser.Game(480, 640, Phaser.AUTO, "ph_game");
+      game = new Phaser.Game(800, 1200, Phaser.AUTO, "ph_game");
     }
   } else {
     //mobile device
