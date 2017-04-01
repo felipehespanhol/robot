@@ -39,10 +39,12 @@ var StateMain = {
     // constant running loop
     game.physics.arcade.collide(this.robot, this.layer);
 
-    if (Math.abs(this.robot.body.velocity.x) > 100) {
-      this.robot.animations.play('walk');
-    } else {
-      this.robot.animations.play('idle');
+    if (this.robot.body.onFloor()) {
+      if (Math.abs(this.robot.body.velocity.x) > 100) {
+        this.robot.animations.play('walk');
+      } else {
+        this.robot.animations.play('idle');
+      }
     }
 
     if (this.robot.body.velocity.x > 0) {
@@ -57,6 +59,20 @@ var StateMain = {
 
     if (cursors.right.isDown) {
       this.robot.body.velocity.x = 250;
+    }
+
+    // Jumping
+    if (cursors.up.isDown) {
+      if (this.robot.body.onFloor()) {
+        this.robot.body.velocity.y = -Math.abs(this.robot.body.velocity.x) - 150;
+        this.robot.animations.play('jump');
+      }
+    }
+
+    // Stopping
+    if (cursors.down.isDown) {
+      this.robot.body.velocity.x = 0;
+      this.robot.body.velocity.y = 0;
     }
   }
 };
