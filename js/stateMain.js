@@ -8,6 +8,9 @@ var StateMain = {
     game.load.tilemap("map", mapPath, null, Phaser.Tilemap.TILED_JSON);
     game.load.spritesheet('arrow', 'images/arrowButtons.png', 60, 60, 4);
     game.load.spritesheet('monster', 'images/main/monsters.png', 50, 50, 2);
+
+    game.load.image("bar1", "images/timer/bar1.png");
+    game.load.image("bar2", "images/timer/bar2.png");
   },
 
   create: function() {
@@ -64,6 +67,14 @@ var StateMain = {
     this.buttonGroup.fixedToCamera = true;
     this.buttonGroup.cameraOffset.setTo(game.width-this.buttonGroup.width/2 - 30, game.height-this.buttonGroup.height);
 
+    this.bar2 = game.add.image(0, 0, "bar2");
+    this.bar1 = game.add.image(0, 0, "bar1");
+    this.timerGroup = game.add.group();
+    this.timerGroup.add(this.bar2);
+    this.timerGroup.add(this.bar1);
+    this.timerGroup.fixedToCamera = true;
+    this.timerGroup.cameraOffset.setTo(game.width/2-this.timerGroup.width, 15);
+
     this.robot = game.add.sprite(150, 150, "robot");
     this.robot.animations.add('idle', [0,1,2,3,4,5,6,7,8,9], 12, true);
     this.robot.animations.add('walk', [10,11,12,13,14,15,16,17], 12, true);
@@ -88,6 +99,19 @@ var StateMain = {
     this.map.setTileIndexCallback(25, this.gotBomb, this);
 
     this.makeMonsters();
+
+    game.world.bringToTop(this.buttonGroup);
+    game.world.bringToTop(this.timerGroup);
+
+    game.time.events.loop(Phaser.Timer.SECOND/4, this.tick, this);
+  },
+
+  tick: function () {
+    if (this.bar1.width > 1) {
+      this.bar1.width--;
+    } else {
+      // game over
+    }
   },
 
   makeMonsters: function () {
