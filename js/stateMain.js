@@ -5,6 +5,7 @@ var StateMain = {
     game.load.image("tiles", "images/tiles.png");
     game.load.tilemap("map", "maps/map1.json", null, Phaser.Tilemap.TILED_JSON);
     game.load.spritesheet('arrow', 'images/arrowButtons.png', 60, 60, 4);
+    game.load.spritesheet('monster', 'images/main/monsters.png', 50, 50, 2);
   },
 
   create: function() {
@@ -26,6 +27,16 @@ var StateMain = {
     this.downArrow = game.add.sprite(0, 50, "arrow");
     this.leftArrow = game.add.sprite(-50, 25, "arrow");
     this.rightArrow = game.add.sprite(50, 25, "arrow");
+
+    this.upArrow.inputEnabled = true;
+    this.downArrow.inputEnabled = true;
+    this.leftArrow.inputEnabled = true;
+    this.rightArrow.inputEnabled = true;
+
+    this.upArrow.events.onInputDown.add(this.doJump, this);
+    this.downArrow.events.onInputDown.add(this.doStop, this);
+    this.leftArrow.events.onInputDown.add(this.goLeft, this);
+    this.rightArrow.events.onInputDown.add(this.goRight, this);
 
     this.upArrow.frame = 0;
     this.downArrow.frame = 1;
@@ -54,9 +65,13 @@ var StateMain = {
     this.robot.scale.x = this.robotSize;
     this.robot.scale.y = this.robotSize;
 
-    game.physics.enable(this.robot, Phaser.Physics.ARCADE);
-
     this.robot.animations.play('idle');
+
+    this.monsterGroup = game.add.group();
+    this.monsterGroup.createMultiple(10, "monster");
+
+    game.physics.arcade.enable([this.robot, this.monsterGroup]);
+
     this.robot.body.gravity.y = 100;
     this.robot.body.bounce.set(0.25);
     this.robot.body.collideWorldBounds = true;
@@ -64,15 +79,33 @@ var StateMain = {
     game.camera.follow(this.robot);
     cursors = game.input.keyboard.createCursorKeys();
     this.map.setTileIndexCallback(25, this.gotBomb, this);
+
+    this.makeMonsters();
+  },
+
+  makeMonsters: function () {
+    for (var i = 0; i < 10; i++) {
+      var monster = this.monsterGroup.getFirstDead();
+      var xx = game.rnd.integerInRange(0, game.world.width);
+      monster.reset(xx, 50);
+      monster.enabled = true;
+      monster.body.velocity.x = -100;
+      monster.body.gravity.y = 100;
+      monster.name = "monster";
+    }
   },
 
   gotBomb: function(sprite, tile) {
+    if (sprite.name == "monster") {
+      return;
+    }
     this.map.removeTile(tile.x, tile.y, this.layer);
   },
 
   update: function() {
     // constant running loop
     game.physics.arcade.collide(this.robot, this.layer);
+    game.physics.arcade.collide(this.monsterGroup, this.layer);
 
     if (this.robot.body.onFloor()) {
       if (Math.abs(this.robot.body.velocity.x) > 100) {
@@ -89,25 +122,41 @@ var StateMain = {
     }
 
     if (cursors.left.isDown) {
-      this.robot.body.velocity.x = -250;
+      this.goLeft();
     }
 
     if (cursors.right.isDown) {
-      this.robot.body.velocity.x = 250;
+      this.goRight();
     }
 
     // Jumping
     if (cursors.up.isDown) {
-      if (this.robot.body.onFloor()) {
-        this.robot.body.velocity.y = -Math.abs(this.robot.body.velocity.x) - 150;
-        this.robot.animations.play('jump');
-      }
+      this.doJump();
     }
 
     // Stopping
     if (cursors.down.isDown) {
-      this.robot.body.velocity.x = 0;
-      this.robot.body.velocity.y = 0;
+      this.doStop();
     }
-  }
+  },
+
+  goLeft: function() {
+    this.robot.body.velocity.x = -250;
+  },
+
+  goRight: function () {
+    this.robot.body.velocity.x = 250;
+  },
+
+  doJump: function () {
+    if (this.robot.body.onFloor()) {
+      this.robot.body.velocity.y = -Math.abs(this.robot.body.velocity.x) - 150;
+      this.robot.animations.play('jump');
+    }
+  },
+
+  doStop: function () {
+    this.robot.body.velocity.x = 0;
+    this.robot.body.velocity.y = 0;
+  },
 };
