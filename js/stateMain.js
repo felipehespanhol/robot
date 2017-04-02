@@ -99,6 +99,9 @@ var StateMain = {
       monster.body.velocity.x = -100;
       monster.body.gravity.y = 100;
       monster.name = "monster";
+
+      monster.animations.add('move', [0,1], 12, true);
+      monster.animations.play('move');
     }
   },
 
@@ -114,10 +117,31 @@ var StateMain = {
     }
   },
 
+  reverseMonster: function (monster, layer) {
+    if (monster.body.blocked.left == true) {
+      monster.body.velocity.x = 100;
+      monster.scale.x = -1;
+    }
+    if (monster.body.blocked.right == true) {
+      monster.body.velocity.x = -100;
+      monster.scale.x = -1;
+    }
+  },
+
+  hitMonster: function(player, monster) {
+    if (player.y < monster.y) {
+      monster.kill();
+    } else {
+      console.log("game over");
+    }
+  },
+
   update: function() {
     // constant running loop
     game.physics.arcade.collide(this.robot, this.layer);
     game.physics.arcade.collide(this.monsterGroup, this.layer);
+    game.physics.arcade.collide(this.monsterGroup, this.layer, null, this.reverseMonster, this);
+    game.physics.arcade.collide(this.robot, this.monsterGroup, null, this.hitMonster, this);
 
     if (this.robot.body.onFloor()) {
       if (Math.abs(this.robot.body.velocity.x) > 100) {
