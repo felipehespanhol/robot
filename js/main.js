@@ -2,6 +2,7 @@ var game;
 var useLandscape = true;
 var soundOn = true;
 var cursors;
+var level = 1;
 
 window.onload = function () {
   var isMobile=navigator.userAgent.indexOf("Mobile");

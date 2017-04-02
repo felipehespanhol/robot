@@ -1,9 +1,11 @@
 var StateMain = {
   preload: function() {
     // load images into library
+    var mapPath = "maps/map"+level+".json";
+
     game.load.spritesheet('robot', 'images/main/robot.png', 80, 111, 28);
     game.load.image("tiles", "images/tiles.png");
-    game.load.tilemap("map", "maps/map1.json", null, Phaser.Tilemap.TILED_JSON);
+    game.load.tilemap("map", mapPath, null, Phaser.Tilemap.TILED_JSON);
     game.load.spritesheet('arrow', 'images/arrowButtons.png', 60, 60, 4);
     game.load.spritesheet('monster', 'images/main/monsters.png', 50, 50, 2);
   },
@@ -12,6 +14,11 @@ var StateMain = {
     // set up objects, variables
     // sounds, text
     // good guys, explosions
+
+    this.bombCount = [4, 10];
+    this.need = this.bombCount[level-1];
+    this.collected = 0;
+
     game.physics.startSystem(Phaser.Physics.ARCADE);
 
     this.robotSize = 0.5;
@@ -100,6 +107,11 @@ var StateMain = {
       return;
     }
     this.map.removeTile(tile.x, tile.y, this.layer);
+    this.collected++;
+    if (this.collected == this.need) {
+      level++;
+      game.state.start("StateMain");
+    }
   },
 
   update: function() {
@@ -138,6 +150,10 @@ var StateMain = {
     if (cursors.down.isDown) {
       this.doStop();
     }
+  },
+
+  render: function () {
+    game.debug.bodyInfo(this.robot, 20, 20);
   },
 
   goLeft: function() {
